@@ -23,7 +23,6 @@ public class RoomDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setString(1, room.getNomorKamar());
-            // Cek tipe kelas pakai instanceof
             String tipe = (room instanceof SuiteRoom) ? "Suite" : "Standard";
             stmt.setString(2, tipe);
             stmt.setString(3, room.getStatus());
@@ -51,7 +50,6 @@ public class RoomDAO {
                 String status = rs.getString("status");
                 
                 Room r;
-                // Polimorfisme: Instansiasi sesuai tipe di DB
                 if (tipe.equalsIgnoreCase("Suite")) {
                     r = new SuiteRoom(nomor);
                 } else {
