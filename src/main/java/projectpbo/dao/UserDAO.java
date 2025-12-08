@@ -16,7 +16,7 @@ import java.util.List;
  * @author Naufal
  */
 public class UserDAO {
-    public void addUser(Person person) {
+    public void addUser(Person person) throws SQLException {
         String sql = "INSERT INTO person (id, nama, username, password, role, jabatan) VALUES (?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = DBConnection.getConnection();
@@ -36,14 +36,10 @@ public class UserDAO {
             }
             
             stmt.executeUpdate();
-            System.out.println("[SUKSES] User " + person.getUsername() + " berhasil didaftarkan.");
-            
-        } catch (SQLException e) {
-            System.err.println("[ERROR] Gagal tambah user: " + e.getMessage());
         }
     }
 
-    public Person getByUsername(String username) {
+        public Person getByUsername(String username) {
         String sql = "SELECT * FROM person WHERE username = ?";
         Person user = null;
         

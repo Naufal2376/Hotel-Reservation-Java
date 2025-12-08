@@ -1,24 +1,99 @@
+package projectpbo.view.panels;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import projectpbo.view.MainFrame;
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
-package projectpbo.view.panels;
+
+import javax.swing.SwingUtilities;
+import projectpbo.view.MainFrame;
 
 /**
  *
- * @author User
+ * @author Naufal
  */
-public class WelcomePanel extends javax.swing.JFrame {
-    
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(WelcomePanel.class.getName());
+public class WelcomePanel extends javax.swing.JPanel {
 
     /**
-     * Creates new form NewJFrame
+     * Creates new form WelcomePanels
      */
+    private JLabel lblJudul;
+    private JLabel lblSubJudul;
+
     public WelcomePanel() {
-        initComponents();
+        initComponentsCustom();
     }
 
+    private void initComponentsCustom() {
+        this.setLayout(new GridBagLayout());
+        this.setBackground(new Color(0, 204, 255));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.gridx = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        lblJudul = new JLabel("SELAMAT DATANG DI GRAND HOTEL");
+        lblJudul.setFont(new Font("Perpetua Titling MT", Font.BOLD, 24));
+        lblJudul.setForeground(Color.WHITE);
+        lblJudul.setHorizontalAlignment(JLabel.CENTER);
+        
+        gbc.gridy = 0;
+        this.add(lblJudul, gbc);
+
+        lblSubJudul = new JLabel("\"Temukan kenyamanan liburan Anda bersama kami...\"");
+        lblSubJudul.setFont(new Font("Serif", Font.ITALIC, 16));
+        lblSubJudul.setForeground(Color.WHITE);
+        lblSubJudul.setHorizontalAlignment(JLabel.CENTER);
+        
+        gbc.gridy = 1;
+        this.add(lblSubJudul, gbc);
+
+        gbc.gridy = 2;
+        this.add(new JLabel(" "), gbc); 
+
+        btnCari = new JButton("CARI KAMAR...");
+        btnCari.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnCari.setBackground(Color.WHITE);
+         btnCari.setIcon(new javax.swing.ImageIcon(getClass().getResource("/projectpbo/view/images/logo-search-png-1.png")));
+        
+        btnCari.addActionListener(e -> {
+            MainFrame mainFrame = (MainFrame) SwingUtilities.getWindowAncestor(this);
+            if (mainFrame != null) {
+                mainFrame.showSearchPanel();
+            }
+        });
+
+        gbc.gridy = 3;
+        gbc.ipadx = 50;
+        gbc.ipady = 10;
+        this.add(btnCari, gbc);
+
+        btnRiwayat = new JButton("RIWAYAT SAYA");
+        btnRiwayat.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnRiwayat.setBackground(Color.WHITE);
+         btnRiwayat.setIcon(new javax.swing.ImageIcon(getClass().getResource("/projectpbo/view/images/png-transparent-e-commerce-online-shopping-ui-receipt-success-transaction-basic-e-commerce-line-icon.png")));
+
+        btnRiwayat.addActionListener(e -> {
+             javax.swing.JOptionPane.showMessageDialog(this, "Fitur Riwayat sedang dikembangkan.");
+             // MainFrame mainFrame = (MainFrame) SwingUtilities.getWindowAncestor(this);
+             // mainFrame.showHistoryPanel(); 
+        });
+
+        gbc.gridy = 4; // Baris ke-4
+        this.add(btnRiwayat, gbc);
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -28,110 +103,89 @@ public class WelcomePanel extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
-        jMenuBar1 = new javax.swing.JMenuBar();
-        jMenu1 = new javax.swing.JMenu();
-        jMenuItem1 = new javax.swing.JMenuItem();
-        jMenu2 = new javax.swing.JMenu();
-        jMenuItem2 = new javax.swing.JMenuItem();
-        jMenuItem3 = new javax.swing.JMenuItem();
-        jMenu3 = new javax.swing.JMenu();
-        jMenuItem4 = new javax.swing.JMenuItem();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        btnCari = new javax.swing.JButton();
+        btnRiwayat = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        jLabel2.setFont(new java.awt.Font("Perpetua Titling MT", 1, 18)); // NOI18N
+        jLabel2.setText("SELAMAT DATANG DI GRAND HOTEL");
+        jLabel2.setAlignmentY(0.0F);
 
-        jPanel1.setLayout(new java.awt.CardLayout());
+        jLabel3.setFont(new java.awt.Font("Serif", 0, 14)); // NOI18N
+        jLabel3.setText("\"Temukan kenyamanan liburan Anda bersama kami...\"");
+        jLabel3.setAlignmentY(1.0F);
 
-        jMenu1.setText("File");
+        btnCari.setFont(new java.awt.Font("Perpetua Titling MT", 1, 12)); // NOI18N
+        btnCari.setIcon(new javax.swing.ImageIcon(getClass().getResource("/projectpbo/view/images/logo-search-png-1.png"))); // NOI18N
+        btnCari.setText("CARI KAMAR...");
+        btnCari.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCariActionPerformed(evt);
+            }
+        });
 
-        jMenuItem1.setText("Keluar");
-        jMenuItem1.addActionListener(this::jMenuItem1ActionPerformed);
-        jMenu1.add(jMenuItem1);
+        btnRiwayat.setFont(new java.awt.Font("Perpetua Titling MT", 1, 12)); // NOI18N
+        btnRiwayat.setIcon(new javax.swing.ImageIcon(getClass().getResource("/projectpbo/view/images/png-transparent-e-commerce-online-shopping-ui-receipt-success-transaction-basic-e-commerce-line-icon.png"))); // NOI18N
+        btnRiwayat.setText("RIWAYAT SAYA");
+        btnRiwayat.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRiwayatActionPerformed(evt);
+            }
+        });
 
-        jMenuBar1.add(jMenu1);
-
-        jMenu2.setText("Reservasi");
-
-        jMenuItem2.setText("Cari Kamar");
-        jMenuItem2.addActionListener(this::jMenuItem2ActionPerformed);
-        jMenu2.add(jMenuItem2);
-
-        jMenuItem3.setText("Riwayat");
-        jMenu2.add(jMenuItem3);
-
-        jMenuBar1.add(jMenu2);
-
-        jMenu3.setText("Akun");
-
-        jMenuItem4.setText("Logout");
-        jMenu3.add(jMenuItem4);
-
-        jMenuBar1.add(jMenu3);
-
-        setJMenuBar(jMenuBar1);
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(23, 23, 23)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(377, Short.MAX_VALUE))
+                .addGap(98, 98, 98)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel2)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(12, 12, 12)
+                        .addComponent(jLabel3)))
+                .addGap(0, 110, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(184, 184, 184)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnCari, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(8, 8, 8)
+                        .addComponent(btnRiwayat)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(23, 23, 23)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(252, Short.MAX_VALUE))
+                .addGap(33, 33, 33)
+                .addComponent(jLabel2)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(28, 28, 28)
+                .addComponent(btnCari, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnRiwayat, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(32, Short.MAX_VALUE))
         );
-
-        pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jMenuItem1ActionPerformed
-
-    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jMenuItem2ActionPerformed
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
+    private void btnCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCariActionPerformed
+        MainFrame mainFrame = (MainFrame) SwingUtilities.getWindowAncestor(this);
+        if (mainFrame != null) {
+            mainFrame.showSearchPanel();
         }
-        //</editor-fold>
+    }//GEN-LAST:event_btnCariActionPerformed
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new WelcomePanel().setVisible(true));
-    }
+    private void btnRiwayatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRiwayatActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnRiwayatActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenu jMenu2;
-    private javax.swing.JMenu jMenu3;
-    private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JMenuItem jMenuItem1;
-    private javax.swing.JMenuItem jMenuItem2;
-    private javax.swing.JMenuItem jMenuItem3;
-    private javax.swing.JMenuItem jMenuItem4;
-    private javax.swing.JPanel jPanel1;
+    private javax.swing.JButton btnCari;
+    private javax.swing.JButton btnRiwayat;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     // End of variables declaration//GEN-END:variables
 }

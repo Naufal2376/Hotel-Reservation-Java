@@ -4,10 +4,16 @@
  */
 package projectpbo;
 
+import projectpbo.view.LoginFrame;
+import javax.swing.SwingUtilities;
 /**
  *
  * @author Naufal
  */
 public class MainApp {
-    
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new LoginFrame().setVisible(true);
+        });
+    }
 }

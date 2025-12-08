@@ -4,10 +4,35 @@
  */
 package projectpbo.service;
 
+import projectpbo.dao.UserDAO;
+import projectpbo.model.person.Person;
 /**
  *
  * @author Naufal
  */
 public class AuthService {
+    private UserDAO userDAO = new UserDAO();
     
+    public static Person currentUser; 
+
+    public boolean login(String username, String password) {
+        Person user = userDAO.getByUsername(username);
+        
+        if (user != null && user.getPassword().equals(password)) {
+            currentUser = user;
+            return true;
+        }
+        return false;
+    }
+    
+    public void logout() {
+        currentUser = null;
+    }
+    
+    public void register(Person person) throws Exception {
+        if (userDAO.getByUsername(person.getUsername()) != null) {
+            throw new IllegalArgumentException("Username sudah terpakai!");
+        }
+        userDAO.addUser(person);
+    }
 }

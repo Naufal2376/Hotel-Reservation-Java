@@ -4,6 +4,13 @@
  */
 package projectpbo.view.panels;
 
+import projectpbo.model.room.Room;
+import projectpbo.service.RoomService;
+import projectpbo.view.MainFrame;
+import java.util.List;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.SwingUtilities;
 /**
  *
  * @author Naufal
@@ -13,8 +20,37 @@ public class SearchRoomPanel extends javax.swing.JPanel {
     /**
      * Creates new form SearchRoomPanel
      */
+    private RoomService roomService = new RoomService();
+    
     public SearchRoomPanel() {
         initComponents();
+        
+        this.setBackground(new java.awt.Color(0, 204, 255));
+        
+        jTable1.setRowHeight(25);
+        jTable1.getTableHeader().setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 12));
+        jTable1.getTableHeader().setOpaque(false);
+        jTable1.getTableHeader().setBackground(new java.awt.Color(255, 255, 255));
+        
+        loadTableData();
+    }
+    
+    private void loadTableData() {
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        model.setRowCount(0);
+        
+        model.setColumnIdentifiers(new Object[]{"Nomor Kamar", "Tipe", "Status", "Harga/Malam"});
+
+        List<Room> listKamar = roomService.getAllRooms();
+        
+        for (Room r : listKamar) {
+            model.addRow(new Object[]{
+                r.getNomorKamar(),
+                r.getClass().getSimpleName(),
+                r.getStatus(),
+                String.format("Rp %.0f", r.getHargaPerMalam())
+            });
+        }
     }
 
     /**
@@ -33,12 +69,12 @@ public class SearchRoomPanel extends javax.swing.JPanel {
         jComboBox2 = new javax.swing.JComboBox<>();
         jTextField1 = new javax.swing.JTextField();
         jTextField2 = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
+        btnCari = new javax.swing.JButton();
         jLabel5 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
-        jButton3 = new javax.swing.JButton();
-        jToggleButton1 = new javax.swing.JToggleButton();
+        btnPesanOrder = new javax.swing.JButton();
+        btnKembali = new javax.swing.JToggleButton();
 
         setBackground(new java.awt.Color(0, 204, 255));
 
@@ -64,10 +100,10 @@ public class SearchRoomPanel extends javax.swing.JPanel {
             }
         });
 
-        jButton1.setText("CARI KAMAR");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnCari.setText("CARI KAMAR");
+        btnCari.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnCariActionPerformed(evt);
             }
         });
 
@@ -88,17 +124,17 @@ public class SearchRoomPanel extends javax.swing.JPanel {
         ));
         jScrollPane1.setViewportView(jTable1);
 
-        jButton3.setText("PESAN SEKARANG");
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
+        btnPesanOrder.setText("PESAN SEKARANG");
+        btnPesanOrder.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
+                btnPesanOrderActionPerformed(evt);
             }
         });
 
-        jToggleButton1.setText("KEMBALI");
-        jToggleButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnKembali.setText("KEMBALI");
+        btnKembali.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jToggleButton1ActionPerformed(evt);
+                btnKembaliActionPerformed(evt);
             }
         });
 
@@ -111,9 +147,9 @@ public class SearchRoomPanel extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addGroup(layout.createSequentialGroup()
-                            .addComponent(jToggleButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnKembali, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 167, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(btnPesanOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 167, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 500, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel1)
                         .addComponent(jLabel5)
@@ -135,7 +171,7 @@ public class SearchRoomPanel extends javax.swing.JPanel {
                 .addContainerGap(25, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnCari, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(208, 208, 208))
         );
         layout.setVerticalGroup(
@@ -156,15 +192,15 @@ public class SearchRoomPanel extends javax.swing.JPanel {
                     .addComponent(jLabel4)
                     .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(20, 20, 20)
-                .addComponent(jButton1)
+                .addComponent(btnCari)
                 .addGap(30, 30, 30)
                 .addComponent(jLabel5)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(30, 30, 30)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jToggleButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnKembali, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnPesanOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(46, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -173,26 +209,59 @@ public class SearchRoomPanel extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_jComboBox2ActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    private void btnCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCariActionPerformed
+        String tipeDipilih = jComboBox2.getSelectedItem().toString(); 
+        
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        model.setRowCount(0);
+        
+        List<Room> listKamar = roomService.getAllRooms();
+        for (Room r : listKamar) {
+            String tipeKamar = r.getClass().getSimpleName();
+            
+            if (tipeDipilih.contains("Item") || tipeKamar.contains(tipeDipilih)) { 
+                 model.addRow(new Object[]{
+                    r.getNomorKamar(), tipeKamar, r.getStatus(), r.getHargaPerMalam()
+                });
+            }
+        }
+    }//GEN-LAST:event_btnCariActionPerformed
 
-    private void jToggleButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jToggleButton1ActionPerformed
+    private void btnKembaliActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnKembaliActionPerformed
+        MainFrame mainFrame = (MainFrame) SwingUtilities.getWindowAncestor(this);
+        
+        if (mainFrame != null) {
+            mainFrame.showWelcomePanel();
+        }
+    }//GEN-LAST:event_btnKembaliActionPerformed
 
     private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField2ActionPerformed
 
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton3ActionPerformed
+    private void btnPesanOrderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPesanOrderActionPerformed
+        int barisPilih = jTable1.getSelectedRow();
+        if (barisPilih == -1) {
+            JOptionPane.showMessageDialog(this, "Pilih dulu kamar yang mau dipesan dari tabel!");
+            return;
+        }
+        
+        String noKamar = jTable1.getValueAt(barisPilih, 0).toString();
+        String status = jTable1.getValueAt(barisPilih, 2).toString();
+        
+        if (!status.equalsIgnoreCase("Tersedia")) {
+            JOptionPane.showMessageDialog(this, "Maaf, kamar ini sedang tidak tersedia.");
+            return;
+        }
+        
+        JOptionPane.showMessageDialog(this, "Proses Booking untuk Kamar " + noKamar + " akan dimulai...");
+    }//GEN-LAST:event_btnPesanOrderActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton3;
+    private javax.swing.JButton btnCari;
+    private javax.swing.JToggleButton btnKembali;
+    private javax.swing.JButton btnPesanOrder;
     private javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -203,6 +272,5 @@ public class SearchRoomPanel extends javax.swing.JPanel {
     private javax.swing.JTable jTable1;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
-    private javax.swing.JToggleButton jToggleButton1;
     // End of variables declaration//GEN-END:variables
 }
