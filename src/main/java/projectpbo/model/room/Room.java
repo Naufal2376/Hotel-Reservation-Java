@@ -11,6 +11,7 @@ package projectpbo.model.room;
 public abstract class Room {
     private String nomorKamar;
     private String status;
+    protected double harga;
 
     public Room(String nomorKamar) {
         this.nomorKamar = nomorKamar;
@@ -18,6 +19,10 @@ public abstract class Room {
     }
 
     public abstract double getHargaPerMalam();
+    
+    public void setHarga(double harga) {
+        this.harga = harga;
+    }
 
     public String getNomorKamar() { return nomorKamar; }
     public String getStatus() { return status; }

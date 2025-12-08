@@ -4,6 +4,20 @@
  */
 package projectpbo.view.panels;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.util.List;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import projectpbo.dao.UserDAO;
+import projectpbo.model.person.Karyawan;
+import projectpbo.model.person.Person;
+import projectpbo.model.person.Pelanggan;
 /**
  *
  * @author Naufal
@@ -13,8 +27,194 @@ public class AdminUserPanel extends javax.swing.JPanel {
     /**
      * Creates new form AdminUserPanel
      */
+    
+    private UserDAO userDAO = new UserDAO();
+    private JTable tableUser;
+    private DefaultTableModel tableModel;
+    
     public AdminUserPanel() {
-        initComponents();
+        initComponentsCustom();
+        loadTableData();
+    }
+    
+    private String selectedUserId = null;
+    
+    private javax.swing.JTextField txtNama, txtUser;
+    private javax.swing.JPasswordField txtPass;
+    private javax.swing.JComboBox<String> comboRole;
+
+    private void initComponentsCustom() {
+        this.setLayout(null); 
+        this.setBackground(new Color(0, 204, 255)); 
+
+        JLabel lblTitle = new JLabel("MANAJEMEN PENGGUNA");
+        lblTitle.setFont(new Font("Perpetua Titling MT", Font.BOLD, 18));
+        lblTitle.setForeground(Color.WHITE);
+        lblTitle.setBounds(30, 20, 300, 30);
+        this.add(lblTitle);
+
+        int y = 70;
+        addLabel("Nama:", 30, y); txtNama = addTextField(120, y); y+=40;
+        addLabel("Username:", 30, y); txtUser = addTextField(120, y); y+=40;
+        addLabel("Password:", 30, y); txtPass = addPasswordField(120, y); y+=40;
+        addLabel("Role:", 30, y); 
+        comboRole = new javax.swing.JComboBox<>(new String[]{"GUEST", "ADMIN"});
+        comboRole.setBounds(120, y, 200, 30);
+        this.add(comboRole);
+        
+        JButton btnSave = new JButton("SIMPAN USER");
+        btnSave.setBounds(340, 70, 150, 40);
+        btnSave.setBackground(new Color(0, 153, 0));
+        btnSave.setForeground(Color.WHITE);
+        btnSave.addActionListener(e -> actionSaveOrUpdate());
+        this.add(btnSave);
+
+        JButton btnReset = new JButton("RESET FORM");
+        btnReset.setBounds(340, 120, 150, 30);
+        btnReset.addActionListener(e -> resetForm());
+        this.add(btnReset);
+
+        String[] columns = {"ID", "Nama", "Username", "Role", "Jabatan"};
+        tableModel = new DefaultTableModel(columns, 0);
+        tableUser = new JTable(tableModel);
+        tableUser.setRowHeight(25);
+        
+        tableUser.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                int row = tableUser.getSelectedRow();
+                if (row != -1) {
+                    selectedUserId = tableUser.getValueAt(row, 0).toString();
+                    txtNama.setText(tableUser.getValueAt(row, 1).toString());
+                    txtUser.setText(tableUser.getValueAt(row, 2).toString());
+                    comboRole.setSelectedItem(tableUser.getValueAt(row, 3).toString());
+                    
+                    txtPass.setText(""); 
+                    JOptionPane.showMessageDialog(null, "Mode Edit Aktif: Silakan isi password baru/lama untuk konfirmasi update.");
+                }
+            }
+        });
+        
+        JScrollPane scrollPane = new JScrollPane(tableUser);
+        scrollPane.setBounds(30, 250, 600, 250);
+        this.add(scrollPane);
+
+        JButton btnHapus = new JButton("HAPUS USER");
+        btnHapus.setBounds(30, 510, 120, 30);
+        btnHapus.setBackground(Color.RED);
+        btnHapus.setForeground(Color.WHITE);
+        btnHapus.addActionListener(e -> actionHapus());
+        this.add(btnHapus);
+        
+        JButton btnRefresh = new JButton("REFRESH");
+        btnRefresh.setBounds(160, 510, 100, 30);
+        btnRefresh.addActionListener(e -> loadTableData());
+        this.add(btnRefresh);
+    }
+    
+    private void addLabel(String text, int x, int y) {
+        JLabel lbl = new JLabel(text);
+        lbl.setForeground(Color.WHITE);
+        lbl.setBounds(x, y, 80, 30);
+        this.add(lbl);
+    }
+    private javax.swing.JTextField addTextField(int x, int y) {
+        javax.swing.JTextField txt = new javax.swing.JTextField();
+        txt.setBounds(x, y, 200, 30);
+        this.add(txt);
+        return txt;
+    }
+    private javax.swing.JPasswordField addPasswordField(int x, int y) {
+        javax.swing.JPasswordField txt = new javax.swing.JPasswordField();
+        txt.setBounds(x, y, 200, 30);
+        this.add(txt);
+        return txt;
+    }
+
+    private void loadTableData() {
+        DefaultTableModel model = (DefaultTableModel) tableUser.getModel();
+        model.setRowCount(0);
+        
+        try {
+            List<Person> users = userDAO.getAllUsers(); 
+            for (Person p : users) {
+                String role = (p instanceof Karyawan) ? "ADMIN" : "GUEST";
+                String jabatan = (p instanceof Karyawan) ? ((Karyawan)p).getJabatan() : "-";
+                
+                model.addRow(new Object[]{
+                    p.getId(), p.getNama(), p.getUsername(), role, jabatan
+                });
+            }
+        } catch (Exception e) {
+            System.err.println("Gagal load table: " + e.getMessage());
+        }
+    }
+    
+    private void resetForm() {
+        txtNama.setText("");
+        txtUser.setText("");
+        txtPass.setText("");
+        comboRole.setSelectedIndex(0);
+        selectedUserId = null;
+        tableUser.clearSelection();
+    }
+    
+    private void actionSaveOrUpdate() {
+        try {
+            String nama = txtNama.getText();
+            String user = txtUser.getText();
+            String pass = new String(txtPass.getPassword());
+            String role = comboRole.getSelectedItem().toString();
+            
+            if (nama.isEmpty() || user.isEmpty() || pass.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Semua data (termasuk password) harus diisi!");
+                return;
+            }
+
+            String id;
+            if (selectedUserId != null) {
+                id = selectedUserId; // Update
+            } else {
+                id = (role.equals("ADMIN") ? "K-" : "P-") + System.currentTimeMillis(); // Insert
+            }
+            
+            Person p;
+            if(role.equals("ADMIN")) {
+                p = new Karyawan(id, nama, user, pass, "Staff");
+            } else {
+                p = new Pelanggan(id, nama, user, pass);
+            }
+            
+            if (selectedUserId != null) {
+                userDAO.updateUser(p); 
+                JOptionPane.showMessageDialog(this, "Data User Berhasil Diupdate!");
+            } else {
+                userDAO.addUser(p);
+                JOptionPane.showMessageDialog(this, "User Baru Berhasil Ditambah!");
+            }
+            
+            loadTableData();
+            resetForm();
+            
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal: " + e.getMessage());
+        }
+    }
+    
+    private void actionHapus() {
+        int row = tableUser.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Pilih user yang ingin dihapus!");
+            return;
+        }
+        
+        String id = tableUser.getValueAt(row, 0).toString();
+        int confirm = JOptionPane.showConfirmDialog(this, "Yakin hapus user ID: " + id + "?");
+        
+        if (confirm == JOptionPane.YES_OPTION) {
+             userDAO.deleteUser(id);
+             loadTableData();
+             resetForm();
+        }
     }
 
     /**

@@ -81,4 +81,36 @@ public class ReservasiDAO {
         }
         return list;
     }
+    
+    public void cancelReservasi(String idReservasi) {
+        String sqlGet = "SELECT nomor_kamar FROM reservasi WHERE id_reservasi = ?";
+        String sqlDel = "DELETE FROM reservasi WHERE id_reservasi = ?";
+        String sqlUpd = "UPDATE room SET status = 'Tersedia' WHERE nomor_kamar = ?";
+        
+        try (Connection conn = DBConnection.getConnection()) {
+            String noKamar = null;
+            
+            try (PreparedStatement stmt = conn.prepareStatement(sqlGet)) {
+                stmt.setString(1, idReservasi);
+                ResultSet rs = stmt.executeQuery();
+                if(rs.next()) noKamar = rs.getString("nomor_kamar");
+            }
+            
+            try (PreparedStatement stmt = conn.prepareStatement(sqlDel)) {
+                stmt.setString(1, idReservasi);
+                stmt.executeUpdate();
+            }
+            
+            if (noKamar != null) {
+                try (PreparedStatement stmt = conn.prepareStatement(sqlUpd)) {
+                    stmt.setString(1, noKamar);
+                    stmt.executeUpdate();
+                }
+            }
+            System.out.println("[SUKSES] Reservasi dibatalkan.");
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

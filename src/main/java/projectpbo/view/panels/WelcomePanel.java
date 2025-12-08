@@ -10,6 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import projectpbo.view.MainFrame;
+import projectpbo.view.panels.MyReservationsPanel;
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
@@ -47,7 +48,6 @@ public class WelcomePanel extends javax.swing.JPanel {
         lblJudul.setFont(new Font("Perpetua Titling MT", Font.BOLD, 24));
         lblJudul.setForeground(Color.WHITE);
         lblJudul.setHorizontalAlignment(JLabel.CENTER);
-        
         gbc.gridy = 0;
         this.add(lblJudul, gbc);
 
@@ -55,25 +55,24 @@ public class WelcomePanel extends javax.swing.JPanel {
         lblSubJudul.setFont(new Font("Serif", Font.ITALIC, 16));
         lblSubJudul.setForeground(Color.WHITE);
         lblSubJudul.setHorizontalAlignment(JLabel.CENTER);
-        
         gbc.gridy = 1;
         this.add(lblSubJudul, gbc);
 
         gbc.gridy = 2;
-        this.add(new JLabel(" "), gbc); 
+        this.add(new JLabel(" "), gbc);
 
         btnCari = new JButton("CARI KAMAR...");
         btnCari.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnCari.setBackground(Color.WHITE);
-         btnCari.setIcon(new javax.swing.ImageIcon(getClass().getResource("/projectpbo/view/images/logo-search-png-1.png")));
-        
+        try {
+            btnCari.setIcon(new javax.swing.ImageIcon(getClass().getResource("/projectpbo/view/images/logo-search-png-1.png")));
+        } catch (Exception e) {
+            System.err.println("Gambar Cari tidak ketemu: " + e.getMessage());
+        }
         btnCari.addActionListener(e -> {
             MainFrame mainFrame = (MainFrame) SwingUtilities.getWindowAncestor(this);
-            if (mainFrame != null) {
-                mainFrame.showSearchPanel();
-            }
+            if (mainFrame != null) mainFrame.showSearchPanel();
         });
-
         gbc.gridy = 3;
         gbc.ipadx = 50;
         gbc.ipady = 10;
@@ -82,16 +81,40 @@ public class WelcomePanel extends javax.swing.JPanel {
         btnRiwayat = new JButton("RIWAYAT SAYA");
         btnRiwayat.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnRiwayat.setBackground(Color.WHITE);
-         btnRiwayat.setIcon(new javax.swing.ImageIcon(getClass().getResource("/projectpbo/view/images/png-transparent-e-commerce-online-shopping-ui-receipt-success-transaction-basic-e-commerce-line-icon.png")));
-
+        try {
+            btnRiwayat.setIcon(new javax.swing.ImageIcon(getClass().getResource("/projectpbo/view/images/png-transparent-e-commerce-online-shopping-ui-receipt-success-transaction-basic-e-commerce-line-icon.png")));
+        } catch (Exception e) {
+            System.err.println("Gambar Riwayat tidak ketemu: " + e.getMessage());
+        }
         btnRiwayat.addActionListener(e -> {
-             javax.swing.JOptionPane.showMessageDialog(this, "Fitur Riwayat sedang dikembangkan.");
-             // MainFrame mainFrame = (MainFrame) SwingUtilities.getWindowAncestor(this);
-             // mainFrame.showHistoryPanel(); 
+             MainFrame mainFrame = (MainFrame) SwingUtilities.getWindowAncestor(this);
+             if (mainFrame != null) mainFrame.showHistoryPanel();
         });
-
-        gbc.gridy = 4; // Baris ke-4
+        gbc.gridy = 4;
         this.add(btnRiwayat, gbc);
+        
+        if (projectpbo.service.AuthService.currentUser instanceof projectpbo.model.person.Karyawan) {
+            
+            JButton btnAdminRoom = new JButton("KELOLA KAMAR (ADMIN)");
+            btnAdminRoom.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            btnAdminRoom.setBackground(Color.ORANGE);
+            btnAdminRoom.addActionListener(e -> {
+                MainFrame mainFrame = (MainFrame) SwingUtilities.getWindowAncestor(this);
+                if (mainFrame != null) mainFrame.showAdminRoomPanel();
+            });
+            gbc.gridy = 5;
+            this.add(btnAdminRoom, gbc);
+            
+            JButton btnAdminUser = new JButton("KELOLA USER (ADMIN)");
+            btnAdminUser.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            btnAdminUser.setBackground(Color.ORANGE);
+            btnAdminUser.addActionListener(e -> {
+                MainFrame mainFrame = (MainFrame) SwingUtilities.getWindowAncestor(this);
+                if (mainFrame != null) mainFrame.showAdminUserPanel();
+            });
+            gbc.gridy = 6;
+            this.add(btnAdminUser, gbc);
+        }
     }
     
     /**

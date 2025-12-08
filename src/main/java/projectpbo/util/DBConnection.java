@@ -20,7 +20,6 @@ public class DBConnection {
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(URL, USER, PASS);
-            System.out.println("Koneksi Berhasil!");
         } catch (SQLException e) {
             System.out.println("Koneksi Gagal: " + e.getMessage());
         }

@@ -33,6 +33,10 @@ public class RoomService {
         roomDAO.addRoom(room);
     }
     
+    public void updateRoom(Room room, String oldNomorKamar) {
+        roomDAO.updateRoom(room, oldNomorKamar);
+    }
+    
     public void deleteRoom(String nomorKamar) {
         roomDAO.deleteRoom(nomorKamar);
     }

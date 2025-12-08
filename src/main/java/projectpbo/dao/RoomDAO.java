@@ -48,6 +48,7 @@ public class RoomDAO {
                 String nomor = rs.getString("nomor_kamar");
                 String tipe = rs.getString("tipe_kamar");
                 String status = rs.getString("status");
+                double harga = rs.getDouble("harga");
                 
                 Room r;
                 if (tipe.equalsIgnoreCase("Suite")) {
@@ -56,6 +57,7 @@ public class RoomDAO {
                     r = new StandardRoom(nomor);
                 }
                 r.setStatus(status);
+                r.setHarga(harga);
                 
                 listKamar.add(r);
             }
@@ -63,6 +65,26 @@ public class RoomDAO {
             System.err.println("[ERROR] Gagal ambil data: " + e.getMessage());
         }
         return listKamar;
+    }
+    
+    public void updateRoom(Room room, String oldNomorKamar) {
+        String sql = "UPDATE room SET nomor_kamar=?, tipe_kamar=?, status=?, harga=? WHERE nomor_kamar=?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, room.getNomorKamar());
+            String tipe = (room instanceof SuiteRoom) ? "Suite" : "Standard";
+            stmt.setString(2, tipe);
+            stmt.setString(3, room.getStatus());
+            stmt.setDouble(4, room.getHargaPerMalam());
+            stmt.setString(5, oldNomorKamar);
+            
+            stmt.executeUpdate();
+            System.out.println("[SUKSES] Kamar berhasil diupdate.");
+        } catch (SQLException e) {
+            System.err.println("[ERROR] Gagal update kamar: " + e.getMessage());
+        }
     }
 
     public void deleteRoom(String nomorKamar) {

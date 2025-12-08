@@ -7,6 +7,8 @@ package projectpbo.view;
 import projectpbo.view.panels.AdminRoomPanel;
 import projectpbo.view.panels.SearchRoomPanel;
 import projectpbo.view.panels.WelcomePanel;
+import projectpbo.view.panels.AdminUserPanel;
+import projectpbo.view.panels.MyReservationsPanel;
 import java.awt.CardLayout;
 import javax.swing.JPanel;
 /**
@@ -36,25 +38,34 @@ public class MainFrame extends javax.swing.JFrame {
 
         javax.swing.JMenuBar menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu menuFile = new javax.swing.JMenu("File");
-        javax.swing.JMenu menuNav = new javax.swing.JMenu("Navigasi");
+        javax.swing.JMenu menuNav = new javax.swing.JMenu("Reservasi");
+        javax.swing.JMenu menuAkun = new javax.swing.JMenu("Akun");
+
         javax.swing.JMenuItem itemExit = new javax.swing.JMenuItem("Keluar");
         javax.swing.JMenuItem itemHome = new javax.swing.JMenuItem("Home / Dashboard");
+        javax.swing.JMenuItem itemCari = new javax.swing.JMenuItem("Cari Kamar");
+        javax.swing.JMenuItem itemRiwayat = new javax.swing.JMenuItem("Riwayat");
         javax.swing.JMenuItem itemLogout = new javax.swing.JMenuItem("Logout");
 
         itemExit.addActionListener(e -> System.exit(0));
-        
         itemHome.addActionListener(e -> showWelcomePanel());
-        
+        itemCari.addActionListener(e -> showSearchPanel());
+        itemRiwayat.addActionListener(e -> showHistoryPanel());
         itemLogout.addActionListener(e -> {
             new LoginFrame().setVisible(true);
             this.dispose();
         });
 
-        menuFile.add(itemLogout);
+        menuAkun.add(itemLogout);
         menuFile.add(itemExit);
+        
         menuNav.add(itemHome);
+        menuNav.add(itemCari);
+        menuNav.add(itemRiwayat);
+        
         menuBar.add(menuFile);
         menuBar.add(menuNav);
+        menuBar.add(menuAkun);
         setJMenuBar(menuBar);
 
         cardLayout = new CardLayout();
@@ -63,24 +74,19 @@ public class MainFrame extends javax.swing.JFrame {
         mainPanel.add(new WelcomePanel(), "welcome");
         mainPanel.add(new SearchRoomPanel(), "search");
         mainPanel.add(new AdminRoomPanel(), "admin");
-        // mainPanel.add(new MyReservationsPanel(), "history"); // Jika sudah ada
+        mainPanel.add(new MyReservationsPanel(), "history");
+        mainPanel.add(new AdminUserPanel(), "adminUser");
 
         add(mainPanel);
-        
         cardLayout.show(mainPanel, "welcome");
     }
 
-    public void showSearchPanel() {
-        cardLayout.show(mainPanel, "search");
-    }
-
-    public void showWelcomePanel() {
-        cardLayout.show(mainPanel, "welcome");
-    }
+    public void showSearchPanel() { cardLayout.show(mainPanel, "search"); }
+    public void showWelcomePanel() { cardLayout.show(mainPanel, "welcome"); }
+    public void showHistoryPanel() { cardLayout.show(mainPanel, "history"); }
     
-    public void showAdminPanel() {
-        cardLayout.show(mainPanel, "admin");
-    }
+    public void showAdminRoomPanel() { cardLayout.show(mainPanel, "admin"); }
+    public void showAdminUserPanel() { cardLayout.show(mainPanel, "adminUser"); }
 
     /**
      * This method is called from within the constructor to initialize the form.

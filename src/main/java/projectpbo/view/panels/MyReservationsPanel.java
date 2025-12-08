@@ -4,6 +4,18 @@
  */
 package projectpbo.view.panels;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.util.List;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import projectpbo.model.Reservasi;
+import projectpbo.service.AuthService;
+import projectpbo.service.ReservationService;
 /**
  *
  * @author Naufal
@@ -13,8 +25,87 @@ public class MyReservationsPanel extends javax.swing.JPanel {
     /**
      * Creates new form MyReservationPanel
      */
+    private ReservationService resService = new ReservationService();
+    private JTable tableHistory;
+    private DefaultTableModel tableModel;
+
     public MyReservationsPanel() {
-        initComponents();
+        initComponentsCustom();
+        loadHistoryData();
+    }
+
+    private void initComponentsCustom() {
+        this.setLayout(null);
+        this.setBackground(new Color(0, 204, 255));
+
+        JLabel lblTitle = new JLabel("RIWAYAT PESANAN SAYA");
+        lblTitle.setFont(new Font("Perpetua Titling MT", Font.BOLD, 18));
+        lblTitle.setForeground(Color.WHITE);
+        lblTitle.setBounds(30, 20, 300, 30);
+        this.add(lblTitle);
+
+        if (AuthService.currentUser != null) {
+            JLabel lblSub = new JLabel("Halo, " + AuthService.currentUser.getNama() + "! Berikut daftar pesanan Anda:");
+            lblSub.setForeground(Color.WHITE);
+            lblSub.setBounds(30, 50, 400, 20);
+            this.add(lblSub);
+        }
+
+        String[] cols = {"ID Booking", "Kamar", "Check-In", "Check-Out", "Total Biaya"};
+        tableModel = new DefaultTableModel(cols, 0);
+        tableHistory = new JTable(tableModel);
+        tableHistory.setRowHeight(25);
+        
+        JScrollPane scroll = new JScrollPane(tableHistory);
+        scroll.setBounds(30, 80, 650, 300);
+        this.add(scroll);
+
+        JButton btnRefresh = new JButton("REFRESH DATA");
+        btnRefresh.setBounds(30, 400, 150, 35);
+        btnRefresh.addActionListener(e -> loadHistoryData());
+        this.add(btnRefresh);
+
+        JButton btnCancel = new JButton("BATALKAN PESANAN");
+        btnCancel.setBounds(200, 400, 200, 35);
+        btnCancel.setBackground(Color.RED);
+        btnCancel.setForeground(Color.WHITE);
+        
+        btnCancel.addActionListener(e -> {
+            int row = tableHistory.getSelectedRow();
+            if (row == -1) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Pilih pesanan yang mau dibatalkan!");
+                return;
+            }
+            
+            String idRes = tableHistory.getValueAt(row, 0).toString();
+            int confirm = javax.swing.JOptionPane.showConfirmDialog(this, "Yakin batalkan pesanan " + idRes + "?");
+            
+            if (confirm == javax.swing.JOptionPane.YES_OPTION) {
+                resService.cancelReservation(idRes);
+                loadHistoryData();
+                javax.swing.JOptionPane.showMessageDialog(this, "Pesanan berhasil dibatalkan.");
+            }
+        });
+        this.add(btnCancel);
+    }
+
+    private void loadHistoryData() {
+        tableModel.setRowCount(0);
+        
+        if (AuthService.currentUser != null) {
+            String myId = AuthService.currentUser.getId();
+            List<Reservasi> list = resService.getUserHistory(myId);
+            
+            for (Reservasi r : list) {
+                tableModel.addRow(new Object[]{
+                    r.getIdReservasi(),
+                    r.getRoom().getNomorKamar(),
+                    r.getCheckIn(),
+                    r.getCheckOut(),
+                    String.format("Rp %.0f", r.getTotalBiaya())
+                });
+            }
+        }
     }
 
     /**

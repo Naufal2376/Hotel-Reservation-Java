@@ -4,13 +4,31 @@
  */
 package projectpbo.view.panels;
 
+import com.toedter.calendar.JDateChooser;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
+import java.util.Date;
+import java.util.List;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableModel;
 import projectpbo.model.room.Room;
+import projectpbo.service.AuthService;
+import projectpbo.service.ReservationService;
 import projectpbo.service.RoomService;
 import projectpbo.view.MainFrame;
-import java.util.List;
-import javax.swing.JOptionPane;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.SwingUtilities;
 /**
  *
  * @author Naufal
@@ -21,35 +39,175 @@ public class SearchRoomPanel extends javax.swing.JPanel {
      * Creates new form SearchRoomPanel
      */
     private RoomService roomService = new RoomService();
-    
+    private ReservationService resService = new ReservationService();
+
     public SearchRoomPanel() {
-        initComponents();
-        
-        this.setBackground(new java.awt.Color(0, 204, 255));
-        
-        jTable1.setRowHeight(25);
-        jTable1.getTableHeader().setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 12));
-        jTable1.getTableHeader().setOpaque(false);
-        jTable1.getTableHeader().setBackground(new java.awt.Color(255, 255, 255));
-        
+        initComponentsCustom();
         loadTableData();
     }
     
-    private void loadTableData() {
-        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
-        model.setRowCount(0);
+    public void initComponentsCustom() {
+        this.setLayout(new GridBagLayout());
+        this.setBackground(new Color(0, 204, 255));
         
-        model.setColumnIdentifiers(new Object[]{"Nomor Kamar", "Tipe", "Status", "Harga/Malam"});
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        
+        JLabel lblTitle = new JLabel("PENCARIAN KAMAR TERSEDIA");
+        lblTitle.setFont(new Font("Perpetua Titling MT", Font.BOLD, 18));
+        lblTitle.setForeground(Color.WHITE);
+        lblTitle.setHorizontalAlignment(JLabel.CENTER);
+        
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
+        this.add(lblTitle, gbc);
 
-        List<Room> listKamar = roomService.getAllRooms();
+        gbc.gridwidth = 1; gbc.gridy = 1; gbc.gridx = 0;
+        this.add(createLabel("Tipe Kamar:"), gbc);
         
-        for (Room r : listKamar) {
-            model.addRow(new Object[]{
+        comboTipe = new JComboBox<>(new String[]{"Semua", "Standard", "Suite"});
+        gbc.gridx = 1;
+        this.add(comboTipe, gbc);
+
+        gbc.gridy = 2; gbc.gridx = 0;
+        this.add(createLabel("Check-In:"), gbc);
+        
+        dateCheckIn = new JDateChooser();
+        dateCheckIn.setDateFormatString("yyyy-MM-dd");
+        dateCheckIn.setDate(new Date());
+        gbc.gridx = 1;
+        this.add(dateCheckIn, gbc);
+
+        gbc.gridy = 3; gbc.gridx = 0;
+        this.add(createLabel("Check-Out:"), gbc);
+        
+        dateCheckOut = new JDateChooser();
+        dateCheckOut.setDateFormatString("yyyy-MM-dd");
+        Date tomorrow = new Date(System.currentTimeMillis() + (1000 * 60 * 60 * 24));
+        dateCheckOut.setDate(tomorrow);
+        gbc.gridx = 1;
+        this.add(dateCheckOut, gbc);
+
+        JButton btnCari = new JButton("CARI KAMAR");
+        btnCari.addActionListener(e -> actionCari());
+        gbc.gridy = 4; gbc.gridx = 0; gbc.gridwidth = 2;
+        this.add(btnCari, gbc);
+
+        String[] cols = {"No Kamar", "Tipe", "Status", "Harga"};
+        tableModel = new DefaultTableModel(cols, 0);
+        tableRoom = new JTable(tableModel);
+        tableRoom.setRowHeight(25);
+        
+        JScrollPane scroll = new JScrollPane(tableRoom);
+        gbc.gridy = 5; gbc.weighty = 1.0; gbc.fill = GridBagConstraints.BOTH;
+        this.add(scroll, gbc);
+
+        JPanel panelBtn = new JPanel();
+        panelBtn.setOpaque(false);
+        
+        JButton btnBack = new JButton("KEMBALI");
+        btnBack.addActionListener(e -> {
+            MainFrame mf = (MainFrame) SwingUtilities.getWindowAncestor(this);
+            if(mf != null) mf.showWelcomePanel();
+        });
+        
+        JButton btnPesan = new JButton("PESAN SEKARANG");
+        btnPesan.setBackground(Color.ORANGE);
+        btnPesan.addActionListener(e -> actionPesan());
+        
+        panelBtn.add(btnBack);
+        panelBtn.add(btnPesan);
+        
+        gbc.gridy = 6; gbc.weighty = 0;
+        this.add(panelBtn, gbc);
+    }
+    
+    private JLabel createLabel(String text) {
+        JLabel lbl = new JLabel(text);
+        lbl.setForeground(Color.WHITE);
+        lbl.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        return lbl;
+    }
+
+    private void loadTableData() {
+        tableModel.setRowCount(0);
+        List<Room> list = roomService.getAllRooms();
+        for (Room r : list) {
+            tableModel.addRow(new Object[]{
                 r.getNomorKamar(),
-                r.getClass().getSimpleName(),
+                r.getClass().getSimpleName().replace("Room", ""),
                 r.getStatus(),
                 String.format("Rp %.0f", r.getHargaPerMalam())
             });
+        }
+    }
+    
+    private void actionCari() {
+        String filter = comboTipe.getSelectedItem().toString();
+        tableModel.setRowCount(0);
+        List<Room> list = roomService.getAllRooms();
+        
+        for (Room r : list) {
+            String tipe = r.getClass().getSimpleName();
+            if(filter.equals("Semua") || tipe.contains(filter)) {
+                tableModel.addRow(new Object[]{
+                    r.getNomorKamar(),
+                    tipe.replace("Room", ""),
+                    r.getStatus(),
+                    String.format("Rp %.0f", r.getHargaPerMalam())
+                });
+            }
+        }
+    }
+    
+    private void actionPesan() {
+        if (AuthService.currentUser == null) {
+            JOptionPane.showMessageDialog(this, "Silakan Login Dulu!"); return;
+        }
+        if (AuthService.currentUser instanceof projectpbo.model.person.Karyawan) {
+            JOptionPane.showMessageDialog(this, "Admin tidak boleh pesan!"); return;
+        }
+        
+        int row = tableRoom.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Pilih kamar di tabel!"); return;
+        }
+        
+        String noKamar = tableRoom.getValueAt(row, 0).toString();
+        String status = tableRoom.getValueAt(row, 2).toString();
+        
+        if (!status.equalsIgnoreCase("Tersedia")) {
+            JOptionPane.showMessageDialog(this, "Kamar tidak tersedia!"); return;
+        }
+        
+        Date dIn = dateCheckIn.getDate();
+        Date dOut = dateCheckOut.getDate();
+        
+        if (dIn == null || dOut == null) {
+            JOptionPane.showMessageDialog(this, "Pilih tanggal Check-In & Check-Out!"); return;
+        }
+        
+        LocalDate ldIn = dIn.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate ldOut = dOut.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        
+        try {
+            Room selectedRoom = null;
+            for(Room r : roomService.getAllRooms()) {
+                if(r.getNomorKamar().equals(noKamar)) { selectedRoom = r; break; }
+            }
+            
+            resService.createReservation(
+                (projectpbo.model.person.Pelanggan) AuthService.currentUser, 
+                selectedRoom, 
+                ldIn, 
+                ldOut
+            );
+            
+            JOptionPane.showMessageDialog(this, "Sukses Booking Kamar " + noKamar);
+            loadTableData();
+            
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal: " + e.getMessage());
         }
     }
 
@@ -219,9 +377,12 @@ public class SearchRoomPanel extends javax.swing.JPanel {
         for (Room r : listKamar) {
             String tipeKamar = r.getClass().getSimpleName();
             
-            if (tipeDipilih.contains("Item") || tipeKamar.contains(tipeDipilih)) { 
+            if (tipeDipilih.equalsIgnoreCase("Semua") || tipeKamar.contains(tipeDipilih)) { 
                  model.addRow(new Object[]{
-                    r.getNomorKamar(), tipeKamar, r.getStatus(), r.getHargaPerMalam()
+                    r.getNomorKamar(), 
+                    tipeKamar.replace("Room", ""), 
+                    r.getStatus(), 
+                    String.format("Rp %.0f", r.getHargaPerMalam())
                 });
             }
         }
@@ -229,7 +390,6 @@ public class SearchRoomPanel extends javax.swing.JPanel {
 
     private void btnKembaliActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnKembaliActionPerformed
         MainFrame mainFrame = (MainFrame) SwingUtilities.getWindowAncestor(this);
-        
         if (mainFrame != null) {
             mainFrame.showWelcomePanel();
         }
@@ -240,6 +400,21 @@ public class SearchRoomPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_jTextField2ActionPerformed
 
     private void btnPesanOrderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPesanOrderActionPerformed
+        if (AuthService.currentUser == null) {
+            JOptionPane.showMessageDialog(this, "Sesi habis. Silakan login ulang.");
+            return;
+        }
+        
+        if (AuthService.currentUser instanceof projectpbo.model.person.Karyawan) {
+            JOptionPane.showMessageDialog(this, "Maaf, akun ADMIN tidak bisa memesan kamar.\nSilakan login sebagai Pelanggan (Guest).");
+            return;
+        }
+        
+        if (AuthService.currentUser == null) {
+            JOptionPane.showMessageDialog(this, "Sesi habis. Silakan login ulang.");
+            return;
+        }
+
         int barisPilih = jTable1.getSelectedRow();
         if (barisPilih == -1) {
             JOptionPane.showMessageDialog(this, "Pilih dulu kamar yang mau dipesan dari tabel!");
@@ -247,17 +422,60 @@ public class SearchRoomPanel extends javax.swing.JPanel {
         }
         
         String noKamar = jTable1.getValueAt(barisPilih, 0).toString();
-        String status = jTable1.getValueAt(barisPilih, 2).toString();
+        String status = jTable1.getValueAt(barisPilih, 2).toString(); 
         
         if (!status.equalsIgnoreCase("Tersedia")) {
             JOptionPane.showMessageDialog(this, "Maaf, kamar ini sedang tidak tersedia.");
             return;
         }
+
+        String tglCheckInStr = jTextField1.getText();
+        String tglCheckOutStr = jTextField2.getText();
         
-        JOptionPane.showMessageDialog(this, "Proses Booking untuk Kamar " + noKamar + " akan dimulai...");
+        if (tglCheckInStr.equals("YYYY-MM-DD") || tglCheckOutStr.equals("YYYY-MM-DD")) {
+            JOptionPane.showMessageDialog(this, "Mohon isi tanggal Check-In dan Check-Out!");
+            return;
+        }
+
+        try {
+            LocalDate checkIn = LocalDate.parse(tglCheckInStr);
+            LocalDate checkOut = LocalDate.parse(tglCheckOutStr);
+            
+            Room roomDipilih = null;
+            for(Room r : roomService.getAllRooms()) {
+                if(r.getNomorKamar().equals(noKamar)) {
+                    roomDipilih = r;
+                    break;
+                }
+            }
+            
+            resService.createReservation(
+                (projectpbo.model.person.Pelanggan) AuthService.currentUser, 
+                roomDipilih, 
+                checkIn, 
+                checkOut
+            );
+            
+            JOptionPane.showMessageDialog(this, "BERHASIL! Kamar " + noKamar + " telah dipesan.");
+            
+            loadTableData(); 
+            
+             MainFrame mf = (MainFrame) SwingUtilities.getWindowAncestor(this);
+             mf.showHistoryPanel();
+
+        } catch (DateTimeParseException e) {
+            JOptionPane.showMessageDialog(this, "Format Tanggal Salah!\nGunakan format: YYYY-MM-DD (Contoh: 2023-12-25)");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal Pesan: " + e.getMessage());
+        }
     }//GEN-LAST:event_btnPesanOrderActionPerformed
 
 
+    private JComboBox<String> comboTipe;
+    private JDateChooser dateCheckIn;
+    private JDateChooser dateCheckOut;
+    private JTable tableRoom;
+    private DefaultTableModel tableModel;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCari;
     private javax.swing.JToggleButton btnKembali;

@@ -39,4 +39,8 @@ public class ReservationService {
     public List<Reservasi> getUserHistory(String idPelanggan) {
         return reservasiDAO.getReservasiByPelanggan(idPelanggan);
     }
+    
+    public void cancelReservation(String idReservasi) {
+        reservasiDAO.cancelReservasi(idReservasi);
+    }
 }

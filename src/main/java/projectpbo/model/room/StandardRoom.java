@@ -9,14 +9,13 @@ package projectpbo.model.room;
  * @author Naufal
  */
 public class StandardRoom extends Room {
-    private double hargaDasar = 300000;
-
     public StandardRoom(String nomorKamar) {
         super(nomorKamar);
+        this.harga = 300000;
     }
 
     @Override
     public double getHargaPerMalam() {
-        return hargaDasar;
+        return this.harga;
     }
 }

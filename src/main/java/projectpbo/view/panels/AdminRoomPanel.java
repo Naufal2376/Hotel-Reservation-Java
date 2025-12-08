@@ -22,17 +22,28 @@ public class AdminRoomPanel extends javax.swing.JPanel {
      */
     
     private RoomService roomService = new RoomService();
-    
+    private String selectedRoomNumber = null;
+
     public AdminRoomPanel() {
         initComponents();
-        
         this.setBackground(new java.awt.Color(0, 204, 255));
-        
         jTable2.setRowHeight(25);
-        jTable2.getTableHeader().setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 12));
         
         setupComboBox();
         loadTableData();
+        
+        jTable2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                int row = jTable2.getSelectedRow();
+                if (row != -1) {
+                    selectedRoomNumber = jTable2.getValueAt(row, 0).toString();
+                    jTextField2.setText(selectedRoomNumber);
+                    jComboBox2.setSelectedItem(jTable2.getValueAt(row, 1).toString());
+                    jComboBox1.setSelectedItem(jTable2.getValueAt(row, 2).toString());
+                    jTextField1.setText(jTable2.getValueAt(row, 3).toString().replace(".0", ""));
+                }
+            }
+        });
     }
     
     private void setupComboBox() {
@@ -54,7 +65,51 @@ public class AdminRoomPanel extends javax.swing.JPanel {
                 r.getHargaPerMalam()
             });
         }
-    }                                      
+    }
+    
+    private void saveOrUpdate(boolean isUpdate) {
+        try {
+            String noKamar = jTextField2.getText();
+            String tipe = jComboBox2.getSelectedItem().toString();
+            String status = jComboBox1.getSelectedItem().toString();
+            String hargaStr = jTextField1.getText();
+            
+            if(noKamar.isEmpty()) { JOptionPane.showMessageDialog(this, "Isi Nomor Kamar!"); return; }
+            if(hargaStr.isEmpty()) { JOptionPane.showMessageDialog(this, "Isi Harga!"); return; }
+
+            Room room;
+            if (tipe.equalsIgnoreCase("Suite")) {
+                room = new SuiteRoom(noKamar);
+            } else {
+                room = new StandardRoom(noKamar);
+            }
+            
+            room.setStatus(status);
+            
+            try {
+                double hargaInput = Double.parseDouble(hargaStr);
+                room.setHarga(hargaInput);
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Harga harus berupa angka!");
+                return;
+            }
+
+            if (selectedRoomNumber != null) {
+                roomService.updateRoom(room, selectedRoomNumber);
+                JOptionPane.showMessageDialog(this, "Data Berhasil Diupdate!");
+                selectedRoomNumber = null; 
+            } else {
+                roomService.saveRoom(room);
+                JOptionPane.showMessageDialog(this, "Data Berhasil Disimpan!");
+            }
+            
+            loadTableData();
+            btnResetActionPerformed(null);
+            
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+        }
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -110,13 +165,10 @@ public class AdminRoomPanel extends javax.swing.JPanel {
 
         jLabel5.setText("Harga/Malam     :");
 
-        jTextField1.setText("jTextField1");
-
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
-        jTextField2.setText("jTextField1");
         jTextField2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jTextField2ActionPerformed(evt);
@@ -246,32 +298,7 @@ public class AdminRoomPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanActionPerformed
-        try {
-            String noKamar = jTextField2.getText();
-            String tipe = jComboBox2.getSelectedItem().toString();
-            String status = jComboBox1.getSelectedItem().toString();
-            
-            if(noKamar.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Nomor kamar harus diisi!");
-                return;
-            }
-
-            Room room;
-            if (tipe.equalsIgnoreCase("Suite")) {
-                room = new SuiteRoom(noKamar);
-            } else {
-                room = new StandardRoom(noKamar);
-            }
-            room.setStatus(status);
-            
-            roomService.saveRoom(room);
-            
-            JOptionPane.showMessageDialog(this, "Data Berhasil Disimpan!");
-            loadTableData();
-            jTextField2.setText("");
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Gagal Simpan: " + e.getMessage());
-        }
+        saveOrUpdate(false);
     }//GEN-LAST:event_btnSimpanActionPerformed
 
     private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
@@ -279,18 +306,14 @@ public class AdminRoomPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_jTextField2ActionPerformed
 
     private void btnHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHapusActionPerformed
-        int baris = jTable2.getSelectedRow();
-        if (baris == -1) {
-            JOptionPane.showMessageDialog(this, "Pilih baris yang mau dihapus!");
-            return;
-        }
+        int row = jTable2.getSelectedRow();
+        if (row == -1) { JOptionPane.showMessageDialog(this, "Pilih baris!"); return; }
         
-        String noKamar = jTable2.getValueAt(baris, 0).toString();
-        int konfirmasi = JOptionPane.showConfirmDialog(this, "Yakin hapus kamar " + noKamar + "?");
-        
-        if (konfirmasi == JOptionPane.YES_OPTION) {
-            roomService.deleteRoom(noKamar);
+        String no = jTable2.getValueAt(row, 0).toString();
+        if (JOptionPane.showConfirmDialog(this, "Hapus kamar " + no + "?") == JOptionPane.YES_OPTION) {
+            roomService.deleteRoom(no);
             loadTableData();
+            btnResetActionPerformed(null);
         }
     }//GEN-LAST:event_btnHapusActionPerformed
 
@@ -299,6 +322,9 @@ public class AdminRoomPanel extends javax.swing.JPanel {
         jTextField2.setText("");
         jComboBox1.setSelectedIndex(0);
         jComboBox2.setSelectedIndex(0);
+        
+        selectedRoomNumber = null;
+        jTable2.clearSelection();
     }//GEN-LAST:event_btnResetActionPerformed
 
     private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
